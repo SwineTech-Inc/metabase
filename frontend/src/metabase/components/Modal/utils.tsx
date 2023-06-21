@@ -27,6 +27,6 @@ export function getModalContent(props: any) {
   ) {
     return <ModalContent {..._.omit(props, "className", "style")} />;
   } else {
-    return props.children;
+    return React.Children.only(props.children);
   }
 }
