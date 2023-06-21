@@ -65,18 +65,20 @@ export class WindowModal extends Component<WindowModalProps> {
         handleDismissal={this.handleDismissal}
         closeOnClickOutside={this.props.closeOnClickOutside}
       >
-        <div
-          className={cx(className, "relative bg-white rounded")}
-          role="dialog"
-        >
-          {getModalContent({
-            ...this.props,
-            fullPageModal: false,
-            // if there is a form then its a form modal, or if there's a form
-            // modal prop use that
-            formModal: !!this.props.form || this.props.formModal,
-          })}
-        </div>
+        <FocusTrap active>
+          <div
+            className={cx(className, "relative bg-white rounded")}
+            role="dialog"
+          >
+            {getModalContent({
+              ...this.props,
+              fullPageModal: false,
+              // if there is a form then its a form modal, or if there's a form
+              // modal prop use that
+              formModal: !!this.props.form || this.props.formModal,
+            })}
+          </div>
+        </FocusTrap>
       </MaybeOnClickOutsideWrapper>
     );
   }
@@ -113,15 +115,13 @@ export class WindowModal extends Component<WindowModalProps> {
                 exit: 250,
               }}
             >
-              <FocusTrap active>
-                <div
-                  className={cx(backdropClassName, backdropClassnames)}
-                  style={style}
-                  data-testid={dataTestId}
-                >
-                  {this._modalComponent()}
-                </div>
-              </FocusTrap>
+              <div
+                className={cx(backdropClassName, backdropClassnames)}
+                style={style}
+                data-testid={dataTestId}
+              >
+                {this._modalComponent()}
+              </div>
             </CSSTransition>
           )}
         </TransitionGroup>
