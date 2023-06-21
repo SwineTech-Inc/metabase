@@ -1,6 +1,7 @@
 import { Component, CSSProperties } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import cx from "classnames";
+import { FocusTrap } from "@mantine/core";
 import {
   getModalContent,
   ModalSize,
@@ -112,13 +113,15 @@ export class WindowModal extends Component<WindowModalProps> {
                 exit: 250,
               }}
             >
-              <div
-                className={cx(backdropClassName, backdropClassnames)}
-                style={style}
-                data-testid={dataTestId}
-              >
-                {this._modalComponent()}
-              </div>
+              <FocusTrap>
+                <div
+                  className={cx(backdropClassName, backdropClassnames)}
+                  style={style}
+                  data-testid={dataTestId}
+                >
+                  {this._modalComponent()}
+                </div>
+              </FocusTrap>
             </CSSTransition>
           )}
         </TransitionGroup>
