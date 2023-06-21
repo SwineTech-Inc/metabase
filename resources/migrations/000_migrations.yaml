@@ -15906,6 +15906,32 @@ databaseChangeLog:
         - sql:
             sql: drop view if exists v_audit_log;
 
+  - changeSet:
+      id: v47.00-050
+      author: qnkhuat
+      comment: Added 0.47.0 - Migrate database.options to database.settings
+      changes:
+        - customChange:
+            class: "metabase.db.custom_migrations.MigrateDatabaseOptionsToSettings"
+
+  - changeSet:
+      id: v47.00-051
+      author: qnkhuat
+      comment: Added 0.47.0 - drop metabase_database.options
+      changes:
+        - dropColumn:
+            tableName: metabase_database
+            columnName: options
+      rollback:
+        - addColumn:
+            tableName: metabase_database
+            columns:
+              - column:
+                  name: options
+                  type: ${text.type}
+                  defaultValue: "{}"
+                  remarks: "Serialized JSON containing various options like QB behavior."
+
   # >>>>>>>>>> DO NOT ADD NEW MIGRATIONS BELOW THIS LINE! ADD THEM ABOVE <<<<<<<<<<
 
 ########################################################################################################################

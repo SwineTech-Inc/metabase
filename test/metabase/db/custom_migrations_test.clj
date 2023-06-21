@@ -18,6 +18,8 @@
    [metabase.models :refer [Card Database Revision User]]
    [metabase.models.interface :as mi]
    [metabase.task :as task]
+   [metabase.util.encryption :as encryption]
+   [metabase.util.encryption-test :as encryption-test]
    [metabase.test.fixtures :as fixtures]
    [toucan2.core :as t2]))
 
@@ -930,3 +932,59 @@
                      :object
                      json/parse-string
                      (get-in ["cards" 0 "visualization_settings"])))))))))
+
+
+(deftest migrate-database-options-to-database-settings-test
+  (let [do-test
+        (fn [encrypted?]
+          (impl/test-migrations "v47.00-050" [migrate!]
+            (let [default-db                {:name       "DB"
+                                             :engine     "postgres"
+                                             :created_at :%now
+                                             :updated_at :%now}
+                  success-id                (first (t2/insert-returning-pks!
+                                                     :model/Database
+                                                     (merge default-db
+                                                            {:options  {:persist-models-enabled true}
+                                                             :settings {:database-enable-actions true}})))
+                  options-nil-settings-id  (first (t2/insert-returning-pks!
+                                                    :model/Database
+                                                    (merge default-db
+                                                           {:options  {:persist-models-enabled true}
+                                                            :settings nil})))
+                  options-empty-settings-id (first (t2/insert-returning-pks!
+                                                     :model/Database
+                                                     (merge default-db
+                                                            {:options  {:persist-models-enabled true}
+                                                             :settings {}})))
+                  nil-options-id            (first (t2/insert-returning-pks!
+                                                     :model/Database
+                                                     (merge default-db
+                                                            {:options  nil
+                                                             :settings {:database-enable-actions true}})))
+                  empty-options-id          (first (t2/insert-returning-pks!
+                                                     :model/Database
+                                                     (merge default-db
+                                                            {:options  {}
+                                                             :settings {:database-enable-actions true}})))]
+              (migrate!)
+
+              (when encrypted?
+                (is (true? (encryption/possibly-encrypted-string?
+                             (:settings (t2/query-one {:select [:settings]
+                                                       :from [:metabase_database]
+                                                       :where [[:= :id success-id]]}))))))
+
+             (is (= {:persist-models-enabled true
+                     :database-enable-actions true}
+                  (t2/select-one-fn :settings :model/Database success-id)))
+
+
+             (let [{:keys [db-type ^javax.sql.DataSource data-source]} mdb.connection/*application-db*]
+               (db.setup/migrate! db-type data-source :down 46)
+               (is (= {:options  {:persist-models-enabled true}
+                       :settings {:database-enable-actions true}}
+                      (t2/select-one [:model/Database :settings :options] success-id)))))))]
+    (do-test false)
+    (encryption-test/with-secret-key "a-very-secret-key"
+      (do-test true))))
