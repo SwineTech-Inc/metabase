@@ -460,6 +460,7 @@ export function ObjectDetailHeader({
                   icon="chevronup"
                 />
                 <Button
+                  tabIndex={0}
                   data-testid="view-next-object-detail"
                   onlyIcon
                   borderless

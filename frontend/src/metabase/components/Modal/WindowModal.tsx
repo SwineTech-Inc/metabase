@@ -113,7 +113,7 @@ export class WindowModal extends Component<WindowModalProps> {
                 exit: 250,
               }}
             >
-              <FocusTrap>
+              <FocusTrap active={this.props.isOpen}>
                 <div
                   className={cx(backdropClassName, backdropClassnames)}
                   style={style}
