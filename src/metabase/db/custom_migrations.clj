@@ -42,6 +42,7 @@
   [name migration-body reverse-migration-body]
   `(defrecord ~name []
      CustomTaskChange
+     ;; TODO I think we need to bound this database connection for custom migrations
      (execute [_# database#]
        ~migration-body)
      (getConfirmationMessage [_#]
