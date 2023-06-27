@@ -357,6 +357,13 @@ export const getStackedTooltipModel = (
       column: hoveredSeries?.data?.cols[METRIC_INDEX],
     });
 
+  const grandTotal = seriesWithGroupedData.reduce((total, series) => {
+    const datum = series.groupedData?.find(
+      datum => datum[DIMENSION_INDEX] === xValue,
+    );
+    return total + (datum?.[METRIC_INDEX] ?? 0);
+  }, 0);
+
   const tooltipRows = seriesToShow
     .map(series => {
       const { card, groupedData, data } = series;
@@ -424,6 +431,7 @@ export const getStackedTooltipModel = (
     totalFormatter: hasBreakout ? totalFormatter : undefined,
     showTotal: hasBreakout,
     showPercentages: hasBreakout,
+    grandTotal,
   };
 };
 
