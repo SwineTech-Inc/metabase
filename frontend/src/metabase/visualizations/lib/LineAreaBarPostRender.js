@@ -253,11 +253,14 @@ function onRenderCleanupGoalAndTrend(chart, onGoalHover, isSplitAxis) {
     // stretch the goal line all the way across, use x axis as reference
     const xAxisLine = chart.selectAll(".axis.x .domain")[0][0];
 
+    /*
+      Change: added + 25 to the width for the goal line label box and text
+    */
     // HACK Atte Keinänen 8/8/17: For some reason getBBox method is not present in Jest/Enzyme tests
     if (xAxisLine && goalLine.getBBox) {
       goalLine.setAttribute(
         "d",
-        `M0,${goalLine.getBBox().y}L${xAxisLine.getBBox().width},${
+        `M0,${goalLine.getBBox().y}L${xAxisLine.getBBox().width + 25},${
           goalLine.getBBox().y
         }`,
       );
@@ -268,16 +271,34 @@ function onRenderCleanupGoalAndTrend(chart, onGoalHover, isSplitAxis) {
       : { x: 0, y: 0, width: 0 };
 
     const labelOnRight = !isSplitAxis;
+
+    /*
+      Change: added a rectangle that sits behind the text. updated style of the text.
+    */
+    chart
+      .selectAll(".goal .stack._0")
+      .append("rect")
+      .attr({
+        x: labelOnRight ? x + width : x,
+        y: y - 10,
+        fill: "rgb(46, 53, 59, 0.8)",
+        width: 40,
+        height: 20,
+        border: "2px solid blue",
+        rx: 4,
+        ry: 4,
+      })
+      .style({ "border-radius": 4 });
     chart
       .selectAll(".goal .stack._0")
       .append("text")
       .text(chart.settings["graph.goal_label"])
       .attr({
-        x: labelOnRight ? x + width : x,
-        y: y - 5,
+        x: labelOnRight ? x + width + 34.5 : x,
+        y: y + 4.5,
         "text-anchor": labelOnRight ? "end" : "start",
         "font-weight": "bold",
-        fill: color("text-medium"),
+        fill: color("text-white"),
       })
       .on("mouseenter", function () {
         onGoalHover(this);
@@ -649,11 +670,14 @@ function beforeRenderFixMargins(chart, args) {
     ".axis.y",
     ".y-axis-label.y-label",
   );
+  /*
+    Change: added a multiple of 12 to the padding to offset for the goal label
+  */
   adjustMargin(
     chart,
     "right",
     "width",
-    Y_AXIS_PADDING,
+    Y_AXIS_PADDING * 12,
     ".axis.yr",
     ".y-axis-label.yr-label",
   );
